@@ -21,4 +21,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+<<<<<<< HEAD
       start_period: 5s
+=======
+      start_period: 5s
+>>>>>>> 0f908db (Initial commit: Google Drive MCP server implementation)

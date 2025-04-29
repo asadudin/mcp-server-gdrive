@@ -33,11 +33,19 @@ ENV/
 
 # Google API credentials
 *.json
+<<<<<<< HEAD
 !mcp-project-458109-5e6bacb68907.json
+=======
+*mcp-project-458109-5e6bacb68907.json
+>>>>>>> 0f908db (Initial commit: Google Drive MCP server implementation)
 
 # Logs
 *.log
 
 # OS specific
 .DS_Store
+<<<<<<< HEAD
 Thumbs.db
+=======
+Thumbs.db
+>>>>>>> 0f908db (Initial commit: Google Drive MCP server implementation)

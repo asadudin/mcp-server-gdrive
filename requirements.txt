@@ -3,4 +3,8 @@ httpx
 google-auth
 google-auth-oauthlib
 python-dotenv
+<<<<<<< HEAD
 PyJWT
+=======
+PyJWT
+>>>>>>> 0f908db (Initial commit: Google Drive MCP server implementation)
