@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  gdrive-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gdrive-mcp-server
+    ports:
+      - "8055:8055"
+    volumes:
+      - ./.env:/app/.env
+      - ./mcp-project-458109-5e6bacb68907.json:/app/mcp-project-458109-5e6bacb68907.json
+    restart: unless-stopped
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8055
+      - GOOGLE_SERVICE_ACCOUNT_FILE=mcp-project-458109-5e6bacb68907.json
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8055/server-info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
