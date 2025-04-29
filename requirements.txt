@@ -1,0 +1,6 @@
+fastmcp
+httpx
+google-auth
+google-auth-oauthlib
+python-dotenv
+PyJWT
