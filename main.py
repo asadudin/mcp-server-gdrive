@@ -25,6 +25,139 @@ mcp = FastMCP(
     port=PORT
 )
 
+# Helper for Google Sheets API
+async def make_sheets_request(endpoint: str, method: str = "GET", params: Optional[dict] = None, data: Optional[dict] = None) -> dict:
+    """
+    Make a request to the Google Sheets API with proper error handling.
+    Args:
+        endpoint: The API endpoint to call (relative to /v4/)
+        method: HTTP method (GET, POST, PUT, PATCH)
+        params: Query parameters
+        data: JSON data for the request body
+    Returns:
+        Response from the API as a dictionary
+    """
+    creds = get_google_creds()
+    creds.refresh(Request())
+    headers = {
+        "Authorization": f"Bearer {creds.token}",
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }
+    url = f"https://sheets.googleapis.com/v4/{endpoint}"
+    async with httpx.AsyncClient() as client:
+        try:
+            if method.upper() == "GET":
+                resp = await client.get(url, headers=headers, params=params, timeout=30.0)
+            elif method.upper() == "POST":
+                resp = await client.post(url, headers=headers, params=params, json=data, timeout=30.0)
+            elif method.upper() == "PUT":
+                resp = await client.put(url, headers=headers, params=params, json=data, timeout=30.0)
+            elif method.upper() == "PATCH":
+                resp = await client.patch(url, headers=headers, params=params, json=data, timeout=30.0)
+            else:
+                return {"error": f"Unsupported method: {method}"}
+            resp.raise_for_status()
+            if resp.headers.get("content-type", "").startswith("application/json"):
+                return resp.json()
+            else:
+                return {"content": resp.content, "headers": dict(resp.headers)}
+        except httpx.HTTPStatusError as e:
+            error_detail = {}
+            try:
+                error_detail = e.response.json()
+            except:
+                error_detail = {"response_text": e.response.text}
+            return {
+                "error": f"API Error: {e.response.status_code} - {str(e)}",
+                "status_code": e.response.status_code,
+                "details": error_detail
+            }
+        except httpx.RequestError as e:
+            return {"error": f"Request Error: {str(e)}"}
+        except Exception as e:
+            return {"error": f"Unexpected error: {str(e)}"}
+
+# ---- Google Sheets Tools ----
+
+@mcp.tool()
+async def create_spreadsheet(title: str) -> str:
+    """
+    Create a new Google Spreadsheet.
+    Args:
+        title: Title of the new spreadsheet
+    Returns:
+        JSON string with spreadsheetId
+    """
+    data = {"properties": {"title": title}}
+    response = await make_sheets_request("spreadsheets", method="POST", data=data)
+    return json.dumps(response, indent=2)
+
+@mcp.tool()
+async def read_sheet_values(spreadsheet_id: str, range: str) -> str:
+    """
+    Read cell values from a Google Spreadsheet.
+    Args:
+        spreadsheet_id: Spreadsheet (document) ID
+        range: A1 notation range (e.g., "Sheet1!A1:C2")
+    Returns:
+        JSON string with cell values
+    """
+    endpoint = f"spreadsheets/{spreadsheet_id}/values/{range}"
+    response = await make_sheets_request(endpoint, method="GET")
+    return json.dumps(response, indent=2)
+
+@mcp.tool()
+async def update_sheet_values(spreadsheet_id: str, range: str, values: list, value_input_option: str = "USER_ENTERED") -> str:
+    """
+    Update cell values in a Google Spreadsheet.
+    Args:
+        spreadsheet_id: Spreadsheet (document) ID
+        range: A1 notation range (e.g., "Sheet1!A1:C2")
+        values: 2D array of values
+        value_input_option: "RAW" or "USER_ENTERED" (default)
+    Returns:
+        JSON string with update result
+    """
+    endpoint = f"spreadsheets/{spreadsheet_id}/values/{range}"
+    params = {"valueInputOption": value_input_option}
+    data = {"values": values}
+    response = await make_sheets_request(endpoint, method="PUT", params=params, data=data)
+    return json.dumps(response, indent=2)
+
+@mcp.tool()
+async def append_sheet_values(spreadsheet_id: str, range: str, values: list, value_input_option: str = "USER_ENTERED") -> str:
+    """
+    Append values to a Google Spreadsheet.
+    Args:
+        spreadsheet_id: Spreadsheet (document) ID
+        range: A1 notation range (e.g., "Sheet1!A1:C2")
+        values: 2D array of values
+        value_input_option: "RAW" or "USER_ENTERED" (default)
+    Returns:
+        JSON string with append result
+    """
+    endpoint = f"spreadsheets/{spreadsheet_id}/values/{range}:append"
+    params = {"valueInputOption": value_input_option}
+    data = {"values": values}
+    response = await make_sheets_request(endpoint, method="POST", params=params, data=data)
+    return json.dumps(response, indent=2)
+
+@mcp.tool()
+async def batch_update_sheet(spreadsheet_id: str, requests: list) -> str:
+    """
+    Batch update a Google Spreadsheet (formatting, find/replace, etc).
+    Args:
+        spreadsheet_id: Spreadsheet (document) ID
+        requests: List of batch update requests (see Sheets API docs)
+    Returns:
+        JSON string with batch update result
+    """
+    endpoint = f"spreadsheets/{spreadsheet_id}:batchUpdate"
+    data = {"requests": requests}
+    response = await make_sheets_request(endpoint, method="POST", data=data)
+    return json.dumps(response, indent=2)
+
 def get_google_creds():
     creds = service_account.Credentials.from_service_account_file(
         SERVICE_ACCOUNT_FILE,
