@@ -17,9 +17,6 @@ ENV PYTHONUNBUFFERED=1
 # Expose the port
 EXPOSE 8055
 
+
 # Run the application
-<<<<<<< HEAD
 CMD ["python", "main.py", "--transport", "sse"]
-=======
-CMD ["python", "main.py", "--transport", "sse"]
->>>>>>> 0f908db (Initial commit: Google Drive MCP server implementation)

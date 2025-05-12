@@ -455,8 +455,4 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--transport', type=str, default='sse', help='Transport type (stdio, sse, etc.)')
     args = parser.parse_args()
-<<<<<<< HEAD
     mcp.run(transport=args.transport)
-=======
-    mcp.run(transport=args.transport)
->>>>>>> 0f908db (Initial commit: Google Drive MCP server implementation)
