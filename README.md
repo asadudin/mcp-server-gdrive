@@ -10,9 +10,6 @@ A Model Context Protocol (MCP) server for interacting with Google Drive API. Thi
 - **Pagination Support**: Handle large file listings efficiently
 - **Comprehensive Error Handling**: Detailed error reporting for easier debugging
 
-<<<<<<< HEAD
-More details coming soon...
-=======
 ## Prerequisites
 
 - Python 3.8+
@@ -130,4 +127,3 @@ Note: Make sure to include `/sse` at the end of the URL for SSE transport.
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
->>>>>>> 0f908db (Initial commit: Google Drive MCP server implementation)
